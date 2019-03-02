@@ -13,33 +13,39 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-require 'grpc'
-require 'active_support/core_ext/module/delegation'
-require 'active_support/concern'
-require 'active_support/inflector'
-require 'base64'
-require_relative 'gruf/version'
-require_relative 'gruf/logging'
-require_relative 'gruf/loggable'
-require_relative 'gruf/services'
-require_relative 'gruf/configuration'
-require_relative 'gruf/errors/helpers'
-require_relative 'gruf/cli/executor'
-require_relative 'gruf/controllers/base'
-require_relative 'gruf/outbound/request_context'
-require_relative 'gruf/interceptors/registry'
-require_relative 'gruf/interceptors/base'
-require_relative 'gruf/timer'
-require_relative 'gruf/response'
-require_relative 'gruf/error'
-require_relative 'gruf/client'
-require_relative 'gruf/synchronized_client'
-require_relative 'gruf/instrumentable_grpc_server'
-require_relative 'gruf/server'
-
-##
-# Initializes configuration of gruf core module
-#
 module Gruf
-  extend Configuration
+  ##
+  # A collection of registered gRPC services associated with controllers.
+  #
+  class Services < Array
+    def initialize(*_args)
+      super
+      @controllers = Hash.new { |h, k| h[k] = [] }
+    end
+
+    ##
+    # Register a service with the controller class being bound to the service.
+    #
+    # @param [Class] service_klass
+    # @param [Class] controller_klass
+    def add(service_klass, controller_klass)
+      mutex do
+        push(service_klass) unless include?(service_klass)
+        @controllers[service_klass] << controller_klass unless @controllers[service_klass].include?(controller_klass)
+      end
+    end
+
+    private
+
+    ##
+    # Handle mutations to the service registry in a thread-safe manner
+    #
+    def mutex(&block)
+      @mutex ||= begin
+        require 'monitor'
+        Monitor.new
+      end
+      @mutex.synchronize(&block)
+    end
+  end
 end

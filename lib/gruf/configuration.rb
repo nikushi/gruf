@@ -13,6 +13,9 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
+
+require_relative 'services'
+
 module Gruf
   ##
   # Represents configuration settings for the system
@@ -28,7 +31,7 @@ module Gruf
       ssl_crt_file: '',
       ssl_key_file: '',
       controllers_path: '',
-      services: [],
+      services: Services.new,
       logger: nil,
       grpc_logger: nil,
       error_metadata_key: :'error-internal-bin',
