@@ -13,6 +13,9 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
+
+require_relative 'controllers/service_binder'
+
 module Gruf
   ##
   # Represents a gRPC server. Automatically loads and augments gRPC handlers and services
@@ -195,6 +198,7 @@ module Gruf
     def setup
       setup_signal_handlers
       load_controllers
+      bind_services
     end
     # :nocov:
 
@@ -236,6 +240,18 @@ module Gruf
     #
     def controllers_path
       options.fetch(:controllers_path, Gruf.controllers_path)
+    end
+
+    ##
+    # Bind each gRPC service to associated controllers
+    #
+    # :nocov:
+    def bind_services
+      Gruf.services.each_with_controllers do |s, controllers|
+        controllers.each do |c|
+          ::Gruf::Controllers::ServiceBinder.new(s).bind!(c)
+        end
+      end
     end
 
     ##

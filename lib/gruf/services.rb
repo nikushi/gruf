@@ -35,6 +35,17 @@ module Gruf
       end
     end
 
+    ##
+    # Iterate each service with associated controllers
+    #
+    def each_with_controllers
+      mutex do
+        @controllers.each do |service, controllers|
+          yield service, controllers
+        end
+      end
+    end
+
     private
 
     ##

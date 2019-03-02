@@ -14,7 +14,6 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 require_relative 'request'
-require_relative 'service_binder'
 
 module Gruf
   module Controllers
@@ -64,7 +63,6 @@ module Gruf
         service_class = service.name.constantize
         Gruf.services.add(service_class, self)
         @bound_service = service_class
-        ServiceBinder.new(service_class).bind!(self)
       end
 
       ##
